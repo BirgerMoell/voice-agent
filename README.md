@@ -1,8 +1,28 @@
 # Offline Voice Agent
 
-A modular speech-to-speech agent that runs locally on Apple Silicon. It listens through the
-microphone, detects complete turns, transcribes speech, streams a response from Ollama, calls
-typed tools, synthesizes speech, and plays it through the Mac's selected output device.
+<p align="center">
+  <img src="assets/voice-agent-hero.png" alt="A local voice-agent pipeline flowing from a microphone through speech recognition, reasoning, tools, and speech synthesis on a laptop" width="100%">
+</p>
+
+<p align="center">
+  <strong>Speak. Think. Act. Entirely on your Mac.</strong>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-22c55e.svg"></a>
+  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-3776ab.svg">
+  <img alt="Apple Silicon" src="https://img.shields.io/badge/Apple%20Silicon-optimized-8b5cf6.svg">
+  <img alt="Local first" src="https://img.shields.io/badge/inference-local-06b6d4.svg">
+  <img alt="Swedish and English" src="https://img.shields.io/badge/voice-Swedish%20%7C%20English-f97316.svg">
+</p>
+
+A fast, inspectable speech-to-speech agent for Apple Silicon. Talk naturally, watch the live
+transcript, let a local LLM use real tools, hear the answer, and interrupt it whenever you want.
+Every major component is replaceable, so the same foundation can power a workshop demo, a focused
+desktop assistant, or a production-grade offline application.
+
+> **No API key. No audio sent to a cloud model. No black box.** After one-time provisioning, the
+> default pipeline runs locally from microphone to spoken response.
 
 After the one-time model downloads, the default pipeline does not send audio, transcripts,
 prompts, tool results, or generated speech to a cloud service.
@@ -15,6 +35,39 @@ microphone → WebRTC VAD → local STT → Ollama + tools → local TTS → afp
 
 This repository is both a working agent and a reference implementation. Each boundary is a
 small interface so you can replace one model or subsystem without rewriting the rest.
+
+## See one turn come alive
+
+Ask: **“Vad är 27 gånger 14?”**
+
+```text
+listening   speak now
+live        "Vad är 27 gånger..."
+transcript  "Vad är 27 gånger 14?"
+thinking    model step 1...
+action      calculate({"expression":"27*14"})
+result      {"expression":"27*14","result":378}
+thinking    model step 2...
+response    Det är 378.
+voice       synthesized in 0.61s
+speaking    press SPACE to interrupt
+```
+
+The transcript, reasoning steps, tool arguments, verified result, and speech latency remain visible.
+That observability makes the agent fun to demo—and practical to debug.
+
+## Why build on this?
+
+- **It feels immediate.** Voice activity detection, model streaming, fast local TTS, and interruption
+  keep the interaction moving.
+- **It can actually do things.** Typed tools turn speech into grounded calculations, files, device
+  controls, or your own application actions.
+- **It is yours.** The default runtime keeps recordings, transcripts, prompts, and responses on the
+  machine.
+- **It teaches the real architecture.** Every module is small enough to understand, replace, and
+  test independently.
+- **It fails visibly.** Tool errors become observations instead of silently turning into invented
+  success stories.
 
 ## What works
 
@@ -51,7 +104,7 @@ For English, use Parakeet plus Kokoro:
 voice-agent --language en --stt parakeet --tts kokoro
 ```
 
-## Quick start
+## Your first conversation
 
 Prerequisites:
 
@@ -71,24 +124,17 @@ uv run --extra apple voice-agent
 The bootstrap script installs the Python environment, starts Ollama when necessary, and pulls
 the default LLM. Speech models download on first use. Later runs use the local model caches.
 
+Then say something. Try these:
+
+```text
+Vad är 144 delat med 12?
+Explain local-first AI in one sentence.
+Berätta något roligt om rymden.
+```
+
 On first microphone use, allow Terminal or your editor under:
 
 `System Settings → Privacy & Security → Microphone`
-
-## The interaction loop
-
-```text
-listening   speak now
-live        "Hej, vad är..."
-transcript  "Hej, vad är 27 gånger 14?"
-thinking    model step 1...
-action      calculate({"expression":"27*14"})
-result      {"expression":"27*14","result":378}
-thinking    model step 2...
-response    Det är 378.
-voice       synthesized in 0.61s
-speaking    press SPACE to interrupt
-```
 
 Press **Space** while speech is playing to stop it and immediately return to listening. This
 mode clears speaker audio queued in the microphone and therefore works with laptop speakers.
